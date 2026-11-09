@@ -39,8 +39,6 @@ if __name__ == "__main__":
     game_config = {"mud_percentage": 20.0,
                    "cell_percentage": 80.0,
                    "wall_percentage": 60.0,
-                   "maze_width": 13,
-                   "maze_height": 10,
                    "nb_cheese": 5}
 
     # Instantiate a game with specified arguments
