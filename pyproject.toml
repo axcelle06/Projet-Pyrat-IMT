@@ -3,7 +3,10 @@ name = "pyrat-workspace"
 version = "0.1.0"
 description = "Workspace for the PyRat software"
 requires-python = ">=3.12,<3.14"
-dependencies = ["pyrat-game"]
+dependencies = [
+    "pyrat-game",
+    "test-py>=0.3",
+]
 
 [build-system]
 requires = ["hatchling"]

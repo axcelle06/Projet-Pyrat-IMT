@@ -27,6 +27,7 @@ from pyrat import Player, Maze, GameState, Action
 ######################################### CLASSES ########################################
 ##########################################################################################
 
+#A modifier pour donner le nom de la stratégie utilisée
 class Random1 (Player):
 
     """
@@ -62,7 +63,7 @@ class Random1 (Player):
     ##################################################################################
     #                                  PYRAT METHODS                                 #
     ##################################################################################
-
+    
     def turn ( self,
                maze:       Maze,
                game_state: GameState,

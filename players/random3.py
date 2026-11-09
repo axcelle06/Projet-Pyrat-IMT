@@ -147,6 +147,11 @@ class Random3 (Player):
         my_location = game_state.player_locations[self.get_name()]
         neighbors = maze.get_neighbors(my_location)
         unvisited_neighbors = [neighbor for neighbor in neighbors if neighbor not in self.visited_cells]
+        """
+        for neighbor in neighbors:
+            if neighbor not in neighbors:
+                return neighbor
+        """
         if len(unvisited_neighbors) > 0:
             neighbor = random.choice(unvisited_neighbors)
             

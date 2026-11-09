@@ -1,0 +1,75 @@
+""" EXECUTER LE JEU  :
+uv run games/sample_game.py
+"""
+
+
+
+##########################################################################################
+########################################## INFO ##########################################
+##########################################################################################
+
+# This file is provided as an example by the PyRat library.
+# It describes a script that creates a PyRat game.
+# Please import necessary elements using the following syntax:
+#     from pyrat import <element_name>
+#     from players.<player_name> import <player_name>
+
+"""
+This file is a script that creates a PyRat game.
+In this script, we create a match between two players.
+We also configure the game with specific parameters such as the maze size, cheese count, and wall percentage.
+"""
+
+##########################################################################################
+######################################### IMPORTS ########################################
+##########################################################################################
+
+# External imports
+import pprint
+
+# PyRat imports
+from pyrat import Game, PlayerSkin
+from players.random2 import Random2
+from players.random3 import Random3
+
+##########################################################################################
+######################################### SCRIPT #########################################
+##########################################################################################
+
+if __name__ == "__main__":
+
+    # First, let's customize the game elements
+    # This is done by setting the arguments of the Game class when instantiating it
+    # In Python, we can also create a dictionary `d` with these arguments and pass it to the Game class using `game = Game(**d)`
+    # This can be convenient for code organization and readability
+    game_config = {"mud_percentage": 20.0,
+                   "cell_percentage": 80.0,
+                   "wall_percentage": 60.0,
+                   "nb_cheese": 5}
+
+    # Instantiate a game with specified arguments
+    game = Game(**game_config)
+    """
+    Params optionnels :
+    random_seed
+    random_seed_maze
+    random_seed_cheese
+    random_seed_players
+    
+    """
+
+    # Instantiate players with different skins, and add them to the game in distinct teams
+    player_1 = Random2(skin=PlayerSkin.MARIO, name = "Aya")
+    player_2 = Random3(skin=PlayerSkin.PYTHON, name = "Claro")
+    player_3 = Random3(skin=PlayerSkin.GHOST, name = "Aksail")
+
+    game.add_player(player_1, team="Team Ratz")
+    game.add_player(player_2, team="Team Ratz")
+    game.add_player(player_3, team="Team Ratz")
+
+    # Start the game
+    stats = game.start()
+    pprint.pprint(stats)
+
+##########################################################################################
+##########################################################################################
