@@ -82,10 +82,10 @@ class TraversalPlayer (Player):
 
         # We perform a traversal of the maze graph from the initial position of the player
         my_location = game_state.player_locations[self.get_name()]
-        self.traversal_algorithm.traversal(maze, my_location)
+        cheese_found = self.traversal_algorithm.traversal(maze, my_location, game_state.cheese)
 
         # Find the series of locations/actions to go from the player location to the first piece of cheese
-        path = self.traversal_algorithm.find_route(game_state.cheese[0])
+        path = self.traversal_algorithm.find_route(cheese_found)
         self.actions = maze.locations_to_actions(path)
 
     ##################################################################################

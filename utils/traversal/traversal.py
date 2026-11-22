@@ -94,10 +94,7 @@ class Traversal (abc.ABC):
 
     ##################################################################################
 
-    def traversal ( self,
-                    graph:  Graph,
-                    source: int
-                  ) ->      None:
+    def traversal ( self, graph:  Graph, source: int, liste_sommets = None) ->      None:
 
         """
         This method performs a traversal of the given graph from the given source vertex.
@@ -112,18 +109,34 @@ class Traversal (abc.ABC):
 
         # Initialization
         self.initialize_structure()
+        if liste_sommets is None:
+            self.distances = {source : 0}
+            self.routing_table = {source : None}
+            self.add_to_structure(source)
+            while not self.is_structure_empty():
+                parent = self.get_from_structure()
+                for voisin in graph.get_neighbors(parent):
+                    if voisin not in self.distances:
+                        self.distances[voisin] = graph.get_weight(parent,voisin) + self.distances[parent]
+                        self.routing_table[voisin] = parent
+                        self.add_to_structure(voisin)
+        else:
+            self.distances = {source : 0}
+            self.routing_table = {source : None}
+            if source in liste_sommets:
+                return source
+            self.add_to_structure(source)
+            while not self.is_structure_empty():
+                parent = self.get_from_structure()
+                for voisin in graph.get_neighbors(parent):
+                    if voisin not in self.distances:
+                        self.distances[voisin] = graph.get_weight(parent,voisin) + self.distances[parent]
+                        self.routing_table[voisin] = parent
+                        self.add_to_structure(voisin)
+                        if voisin in liste_sommets:
+                            return voisin
 
 
-        self.distances = {source : 0}
-        self.routing_table = {source : None}
-        self.add_to_structure(source)
-        while not self.is_structure_empty():
-            parent = self.get_from_structure()
-            for voisin in graph.get_neighbors(parent):
-                if voisin not in self.distances:
-                    self.distances[voisin] = graph.get_weight(parent,voisin) + self.distances[parent]
-                    self.routing_table[voisin] = parent
-                    self.add_to_structure(voisin)
         return None
     ##################################################################################
 
