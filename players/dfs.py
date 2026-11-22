@@ -1,39 +1,26 @@
+#Executer les tests :
+"""
+uv run python -m unittest discover -s tests
+"""
+
 # External imports
 import random
 
 # PyRat imports
-from pyrat import Player, Maze, GameState, Action
+from pyrat import Player, Maze, GameState, Action, Graph
 
 class DFS(Player) : 
-    def __init___  ( self,
-                   *args:    object,
-                   **kwargs: object
-                 ) ->        None:
+    def __init___  ( self, *args:    object,  **kwargs: object ) ->        None:
         super().__init__(*args, **kwargs)
-
-        # We create an attribute to keep track of visited cells
-        # We will initialize it in the ``preprocessing()`` method to allow the game to be reset
-        # Otherwise, the set would keep the cells visited in previous games
-        self.visited_cells = None
-
-        # We also create an attribute for the reduced maze
-        self.reduced_maze = None
+        self.visited_cells = None #setup dans préprocessing
+        self.reduced_maze = None #labyrinthe optimisé sans les dead ends
        
     
 
-    def preprocessing ( self,
-                        maze:       Maze,
-                        game_state: GameState,
-                      ) ->          None:
+    def preprocessing ( self, maze: Maze, game_state: GameState) -> None:
         
         """
-        *(This method redefines the method of the parent class with the same name).*
-
-        This method is called once at the beginning of the game.
-        Here, we use it to create a reduced maze that contains only the cells that are not dead-ends.
-        We define a dead-end as a cell that has only one neighbor and does not contain cheese or the player.
-        Note that this is not the best way to define a dead-end, but it is a simple one.
-
+        Reduce le labyrinthe pour enlever les dead ends
         Args:
             maze:       An object representing the maze in which the player plays.
             game_state: An object representing the state of the game.
@@ -47,15 +34,9 @@ class DFS(Player) :
         self.reduced_maze = self.remove_dead_ends(maze, [my_location] + game_state.cheese)
 
     ##################################################################################
-
-    def turn ( self,
-               maze:       Maze,
-               game_state: GameState,
-             ) ->          Action:
-
+     
+    def turn ( self, maze: Maze, game_state: GameState) -> Action:
         """
-        *(This method redefines the method of the parent class with the same name).*
-
         It is called at each turn of the game.
         It returns an action to perform among the possible actions, defined in the ``Action`` enumeration.
         We also update the set of visited cells at each turn.
@@ -79,11 +60,9 @@ class DFS(Player) :
         return action
 
 
-    def traversal ( self,
-                graph:  Graph,
-                source: int
-              ) ->      tuple[dict[int, int], dict[int, int | None]]:
+    def traversal ( self, graph:  Graph, source: int, table_de_routage = None, sommets_explores = None ) -> tuple[dict[int, int], dict[int, int | None]]:
 
+        #note : j'ai mis table de routage= {} et ça buggait parce que l'argument restait en mémoire donc à l'appel d'une autre fonction ça utilisait les valeurs de l'argument de l'appel précédent !! ducoup bien mettre None
         """
         This method performs a DFS traversal of a graph.
         It returns the explored vertices with associated distances.
@@ -99,7 +78,49 @@ class DFS(Player) :
             - The distances from the source to each explored vertex.
             - The routing table, that is, the parent of each vertex in the traversal (None for the source).
         """
+        if table_de_routage is None:
+            table_de_routage = {source : None}
+            sommets_explores = {source :  0}
 
-        # Your code here
+        
+        for voisin in graph.get_neighbors(source):
+            if voisin not in sommets_explores:
+                table_de_routage[voisin] = source
+                
+                sommets_explores[voisin] = graph.get_weight(voisin,source) + sommets_explores[source]
+                self.traversal(graph,voisin, table_de_routage, sommets_explores)
+
+        return (sommets_explores, table_de_routage)
+
+
+    def find_route ( self, routing_table: dict[int, int | None], source: int, target:int) -> list[int]:
+        #pas d'ia utilisée
+        """
+        This method finds the route from a source vertex to a target vertex using a routing table.
+
+        Args:
+            routing_table: The routing table, that is, the parent of each vertex in the traversal (None for the source) ({sommet : parent}).
+            source:        The source vertex.
+            target:        The target vertex.
+
+        Returns:
+            The route from the source to the target as a list of vertices.
+        """
+        if not isinstance(routing_table,dict):
+            raise TypeError("La table de routage doit etre de type dict[int, int|None]")
+        
+        if target not in routing_table:
+            raise KeyError("La source ou la target n'est pas dans le graphe")
+        
+        if target==source:
+            return [source]
+        
+        parent = routing_table[target]
+        if parent is None:
+            raise KeyError("Aucun chemin entre la source et la target")
+        return self.find_route(routing_table, source, parent)+[target]
+
+
+
+
     
-   
