@@ -1,20 +1,21 @@
-#Executer les tests :
-"""
-uv run python -m unittest discover -s tests
-"""
-
 # External imports
 import random
+import numpy as np
 
 # PyRat imports
 from pyrat import Player, Maze, GameState, Action, Graph
 
 class DFS(Player) : 
+
+    # TODO : -étudier le comportement du dfs sur plusieurs labyrinthes (notamment voir ce qu'il se passe pour plusieurs froamges ?)
+    #        -mettre la méthode remove dead_ends sur le dfs pour optimiser le preprocessing
+
+
     def __init___  ( self, *args:    object,  **kwargs: object ) ->        None:
         super().__init__(*args, **kwargs)
         self.visited_cells = None #setup dans préprocessing
         self.reduced_maze = None #labyrinthe optimisé sans les dead ends
-       
+        self.actions = None #liste d'action (enum north south east west)
     
 
     def preprocessing ( self, maze: Maze, game_state: GameState) -> None:
@@ -31,7 +32,14 @@ class DFS(Player) :
 
         # Reduce the maze
         my_location = game_state.player_locations[self.get_name()]
-        self.reduced_maze = self.remove_dead_ends(maze, [my_location] + game_state.cheese)
+        #self.reduced_maze = self.remove_dead_ends(maze, [my_location] + game_state.cheese)
+        _, routing_table = self.traversal(maze,my_location)
+        #On considère ici qu'on prend les fromages dans l'ordre où ils sont dans game_state, à opti plus tard ?
+        chemin_fromage = self.find_route(routing_table, my_location, game_state.cheese[0])
+        self.actions = [maze.locations_to_action(chemin_fromage[i],chemin_fromage[i+1]) for i in range(len(chemin_fromage)-1)]
+
+
+        
 
     ##################################################################################
      
@@ -54,9 +62,8 @@ class DFS(Player) :
         my_location = game_state.player_locations[self.get_name()]
         if my_location not in self.visited_cells:
             self.visited_cells.add(my_location)
-
-        # Return an action
-        action = self.find_next_action(self.reduced_maze, game_state)
+        action = self.actions[0]
+        self.actions = self.actions[1:]
         return action
 
 
@@ -89,7 +96,7 @@ class DFS(Player) :
                 
                 sommets_explores[voisin] = graph.get_weight(voisin,source) + sommets_explores[source]
                 self.traversal(graph,voisin, table_de_routage, sommets_explores)
-
+        #filo
         return (sommets_explores, table_de_routage)
 
 

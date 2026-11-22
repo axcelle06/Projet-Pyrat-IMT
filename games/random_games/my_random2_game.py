@@ -1,6 +1,6 @@
 # PyRat imports
 from pyrat import Game
-from players.random2 import Random2
+from players.randoms.random2 import Random2
 if __name__ == "__main__":      
 # Instantiate a game with a few arguments
     game = Game(maze_width=6, maze_height=5, nb_cheese=1)

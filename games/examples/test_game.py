@@ -29,8 +29,8 @@ import pprint
 
 # PyRat imports
 from pyrat import Game, PlayerSkin
-from players.random2 import Random2
-from players.random3 import Random3
+from players.randoms.random2 import Random2
+from players.randoms.random3 import Random3
 
 ##########################################################################################
 ######################################### SCRIPT #########################################

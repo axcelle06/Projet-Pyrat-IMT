@@ -1,8 +1,8 @@
 # PyRat imports
 from pyrat import Game
-from players.random1 import Random1 
-from players.random2 import Random2
-from players.random3 import Random3
+from players.randoms.random1 import Random1 
+from players.randoms.random2 import Random2
+from players.randoms.random3 import Random3
 
 if __name__=='__main__':
     """

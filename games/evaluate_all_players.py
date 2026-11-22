@@ -5,10 +5,13 @@ import scipy.stats as scstats
 
 # PyRat imports
 from pyrat import Game, GameMode
-from players.random1 import Random1
-from players.random2 import Random2
-from players.random3 import Random3
-from players.random4 import Random4
+from players.randoms.random1 import Random1
+from players.randoms.random2 import Random2
+from players.randoms.random3 import Random3
+from players.randoms.random4 import Random4
+from players.bfs import BFS
+from players.dfs import DFS
+
 
 # Determines how many games will be played for each player
 nb_games = 1000
@@ -19,7 +22,7 @@ game_config = {"mud_percentage": 0.0,
             "game_mode": GameMode.SIMULATION}
 
 # Run the games for each player class
-players = [Random1(), Random2(), Random3(), Random4()]
+players = [Random1(), Random2(), Random3(), Random4(), BFS(), DFS()]
 results = {player.get_name(): [] for player in players}
 for player in players:
     for seed in tqdm.tqdm(range(nb_games), desc=player.get_name()):
