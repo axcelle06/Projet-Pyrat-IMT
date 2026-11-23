@@ -26,7 +26,7 @@ from utils.traversal.bfs_traversal import BFSTraversal
 if __name__ == "__main__":
 
     # Instantiate a game with a few arguments
-    game_config = {"mud_percentage": 25.0,
+    game_config = {"mud_percentage": 0.0,
                    "maze_width": 13,
                    "maze_height": 10,
                    "nb_cheese": 1,
