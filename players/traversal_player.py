@@ -15,6 +15,7 @@ https://hub.imt-atlantique.fr/ueinfo-fise1a/s5/project/session2/practical/
 from pyrat import Player, Maze, GameState, Action
 from utils.traversal.traversal import Traversal
 from utils.traversal.bfs_traversal import BFSTraversal
+from utils.traversal.dijkstra_traversal import DijkstraTraversal
 
 ##########################################################################################
 ######################################### CLASSES ########################################
@@ -58,7 +59,7 @@ class TraversalPlayer (Player):
         self.actions = None
 
         # We store the chosen traversal algorithm, or create the default one
-        self.traversal_algorithm = traversal_algorithm if traversal_algorithm is not None else BFSTraversal()
+        self.traversal_algorithm = traversal_algorithm if traversal_algorithm is not None else DijkstraTraversal()
 
     ##################################################################################
     #                                  PYRAT METHODS                                 #
