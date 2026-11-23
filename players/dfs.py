@@ -1,6 +1,10 @@
+<<<<<<< Updated upstream
 # External imports
 import random
 import numpy as np
+=======
+
+>>>>>>> Stashed changes
 
 # PyRat imports
 from pyrat import Player, Maze, GameState, Action, Graph
@@ -89,6 +93,7 @@ class DFS(Player) :
             table_de_routage = {source : None}
             sommets_explores = {source :  0}
 
+<<<<<<< Updated upstream
         
         for voisin in graph.get_neighbors(source):
             if voisin not in sommets_explores:
@@ -131,3 +136,33 @@ class DFS(Player) :
 
 
     
+=======
+        # Your code here
+
+
+            u =
+            v =
+            
+            graph.get_weight(u, v)
+
+    """
+    This method performs a DFS traversal of a graph.
+    It returns the explored vertices with associated distances.
+    The distance to a vertex is the sum of the weights of the edges along the path found (given by ``graph.get_weight(...)``).
+    It also returns the routing table, that is, the parent of each vertex in the traversal.
+
+    Args:
+        graph:  The graph to traverse.
+        source: The source vertex of the traversal (we type it as int here because we will only manipulate mazes, but Graph uses Hashable as a more generic type).
+
+    Returns:
+        A tuple containing:
+        - The distances from the source to each explored vertex.
+        - The routing table, that is, the parent of each vertex in the traversal (None for the source).
+    """
+
+    # Your code here
+    
+    
+   
+>>>>>>> Stashed changes
