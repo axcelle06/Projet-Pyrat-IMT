@@ -112,7 +112,9 @@ class DFSTraversal_Tests (unittest.TestCase):
         # The routing table should be a dictionary with integer keys and integer or None values
         for maze in self.random_mazes:
             start_vertex = maze.get_vertices()[0]
-            distances, routing_table = self.player.traversal(maze, start_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            distances = self.traversal.get_distances()
+            routing_table = self.traversal.get_routing_table()
             self.assertIsInstance(distances, dict, "Distances should be a dictionary")
             self.assertTrue(all(isinstance(k, int) and isinstance(v, int) for k, v in distances.items()), "Distances should have integer keys and values")
             self.assertIsInstance(routing_table, dict, "The routing table should be a dictionary")
@@ -132,7 +134,9 @@ class DFSTraversal_Tests (unittest.TestCase):
         # Both outputs should have the maze vertices as keys
         for maze in self.random_mazes:
             start_vertex = maze.get_vertices()[0]
-            distances, routing_table = self.player.traversal(maze, start_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            distances = self.traversal.get_distances()
+            routing_table = self.traversal.get_routing_table()
             self.assertEqual(set(distances.keys()), set(maze.get_vertices()), "Distances should be given for all vertices of the maze, and only for them")
             self.assertEqual(set(routing_table.keys()), set(maze.get_vertices()), "The routing table should contain all vertices of the maze, and only them")
 
@@ -150,7 +154,8 @@ class DFSTraversal_Tests (unittest.TestCase):
         # To check this, we go up from each vertex to the root, to find all its ancestors in the tree
         for maze in self.random_mazes:
             start_vertex = maze.get_vertices()[0]
-            _, routing_table = self.player.traversal(maze, start_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            routing_table = self.traversal.get_routing_table()
             ancestors = {}
             for vertex in routing_table:
                 ancestors[vertex] = set()
@@ -179,7 +184,9 @@ class DFSTraversal_Tests (unittest.TestCase):
         # The start vertex is at distance 0, and the distance increases by the weight of each edge in the routing table
         for maze in self.random_mazes:
             start_vertex = maze.get_vertices()[0]
-            distances, routing_table = self.player.traversal(maze, start_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            distances = self.traversal.get_distances()
+            routing_table = self.traversal.get_routing_table()
             self.assertEqual(distances[start_vertex], 0, "The distance to the start vertex should be 0")
             for vertex in routing_table.keys() - {start_vertex}:
                 parent = routing_table[vertex]
@@ -206,7 +213,8 @@ class DFSTraversal_Tests (unittest.TestCase):
         # To check this, we go up from each vertex to the root, to find all its ancestors in the tree
         for maze in self.random_mazes:
             start_vertex = maze.get_vertices()[0]
-            _, routing_table = self.player.traversal(maze, start_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            routing_table = self.traversal.get_routing_table()
             ancestors = {}
             for vertex in routing_table:
                 ancestors[vertex] = set()
@@ -232,7 +240,7 @@ class DFSTraversal_Tests (unittest.TestCase):
         for maze in self.random_mazes:
             start_vertex = maze.get_vertices()[0]
             maze_before = copy.deepcopy(maze.as_dict())
-            self.player.traversal(maze, start_vertex)
+            self.traversal.traversal(maze, start_vertex)
             self.assertEqual(maze.as_dict(), maze_before, "The traversal should not modify the maze")
 
     ##################################################################################
@@ -262,7 +270,8 @@ class DFSTraversal_Tests (unittest.TestCase):
 
         # Outputs should match one of the expected ones
         for test in TESTS:
-            outputs = self.player.traversal(test["maze"], test["start"])
+            self.traversal.traversal(test["maze"], test["start"])
+            outputs = (self.traversal.get_distances(), self.traversal.get_routing_table())
             self.assertIn(outputs, test["outputs"], f"Unexpected outputs for a traversal from vertex {test['start']}")
 
     ##################################################################################
@@ -278,8 +287,8 @@ class DFSTraversal_Tests (unittest.TestCase):
         # Only the source should be visited
         graph = Graph()
         graph.add_vertex(0)
-        self.assertEqual(self.player.traversal(graph, 0), ({0: 0}, {0: None}), "Only the source should be visited in a graph with a single vertex")
-
+        self.traversal.traversal(graph, 0)
+        self.assertEqual((self.traversal.get_distances(), self.traversal.get_routing_table()), ({0: 0}, {0: None}), "Only the source should be visited in a graph with a single vertex")
     ##################################################################################
 
     def test___dfs_traversal___disconnected_maze___only_component_visited (self) -> None:
@@ -291,8 +300,8 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Vertices 2 and 3 cannot be reached from 0
-        self.assertEqual(self.player.traversal(self.disconnected_maze, 0), ({0: 0, 1: 1}, {0: None, 1: 0}), "Only the vertices reachable from the source should be visited")
-
+        self.traversal.traversal(self.disconnected_maze, 0)
+        self.assertEqual((self.traversal.get_distances(), self.traversal.get_routing_table()), ({0: 0, 1: 1}, {0: None, 1: 0}), "Only the vertices reachable from the source should be visited")
     ##################################################################################
 
     def test___dfs_traversal___source_not_in_maze___raises_error (self) -> None:
@@ -305,8 +314,7 @@ class DFSTraversal_Tests (unittest.TestCase):
 
         # Cell 9 does not exist in this maze
         with self.assertRaises(PyRatException, msg="A traversal from a vertex that is not in the maze should raise an error"):
-            self.player.traversal(self.disconnected_maze, 9)
-
+            self.traversal.traversal(self.disconnected_maze, 9)
     ##################################################################################
 
     def test___dfs_traversal___graph_not_a_graph___raises_error (self) -> None:
@@ -319,10 +327,9 @@ class DFSTraversal_Tests (unittest.TestCase):
 
         # None and a dictionary do not have a get_neighbors(...) method
         with self.assertRaises(AttributeError, msg="A traversal of None should raise an error"):
-            self.player.traversal(None, 0)
+            self.traversal.traversal(None, 0)
         with self.assertRaises(AttributeError, msg="A traversal of a dictionary should raise an error, even if it describes a graph"):
-            self.player.traversal({0: {1: 1}, 1: {0: 1}}, 0)
-
+            self.traversal.traversal({0: {1: 1}, 1: {0: 1}}, 0)
     ##################################################################################
 
     def test___dfs_traversal___source_wrong_type___raises_error (self) -> None:
@@ -335,9 +342,9 @@ class DFSTraversal_Tests (unittest.TestCase):
 
         # "0" is a string, not the integer 0
         with self.assertRaises(PyRatException, msg="A traversal from a string should raise an error"):
-            self.player.traversal(self.disconnected_maze, "0")
+            self.traversal.traversal(self.disconnected_maze, "0")
         with self.assertRaises(PyRatException, msg="A traversal from None should raise an error"):
-            self.player.traversal(self.disconnected_maze, None)
+            self.traversal.traversal(self.disconnected_maze, None)
 
     ##################################################################################
     #                             TESTS (dfs.find_route)                             #
@@ -354,8 +361,8 @@ class DFSTraversal_Tests (unittest.TestCase):
         # The route should be a list of integers
         for maze in self.random_mazes:
             start_vertex, target_vertex = maze.get_vertices()[0], maze.get_vertices()[-1]
-            _, routing_table = self.player.traversal(maze, start_vertex)
-            route = self.player.find_route(routing_table, start_vertex, target_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            route = self.traversal.find_route(target_vertex)
             self.assertIsInstance(route, list, "The route should be a list")
             self.assertTrue(all(isinstance(v, int) for v in route), "The route should only contain integers")
 
@@ -373,8 +380,9 @@ class DFSTraversal_Tests (unittest.TestCase):
         # The route starts at the start, ends at the target, and each vertex is the parent of the next one
         for maze in self.random_mazes:
             start_vertex, target_vertex = maze.get_vertices()[0], maze.get_vertices()[-1]
-            _, routing_table = self.player.traversal(maze, start_vertex)
-            route = self.player.find_route(routing_table, start_vertex, target_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            routing_table = self.traversal.get_routing_table()
+            route = self.traversal.find_route(target_vertex)
             self.assertEqual(route[0], start_vertex, "The route should start at the start vertex")
             self.assertEqual(route[-1], target_vertex, "The route should end at the target vertex")
             self.assertTrue(all(routing_table[route[j + 1]] == route[j] for j in range(len(route) - 1)), "Each vertex of the route should be the parent of the next one in the routing table")
@@ -393,9 +401,10 @@ class DFSTraversal_Tests (unittest.TestCase):
         # The routing table should be the same before and after finding the route
         for maze in self.random_mazes:
             start_vertex, target_vertex = maze.get_vertices()[0], maze.get_vertices()[-1]
-            _, routing_table = self.player.traversal(maze, start_vertex)
+            self.traversal.traversal(maze, start_vertex)
+            routing_table = self.traversal.get_routing_table()
             routing_table_before = copy.deepcopy(routing_table)
-            self.player.find_route(routing_table, start_vertex, target_vertex)
+            self.traversal.find_route(target_vertex)
             self.assertEqual(routing_table, routing_table_before, "Finding a route should not modify the routing table")
 
     ##################################################################################
@@ -409,13 +418,11 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Routing table obtained with a traversal of the tree maze from vertex 4 (see the ``setUpClass(...)`` method)
-        routing_table = {4: None, 1: 4, 3: 4, 7: 4, 0: 1, 2: 1, 6: 7, 8: 7, 5: 8}
+        self.traversal.traversal(self.tree_maze, 4)
 
-        # The route should be exactly the expected one
-        self.assertEqual(self.player.find_route(routing_table, 4, 3), [4, 3], "Wrong route from vertex 4 to vertex 3")
-        self.assertEqual(self.player.find_route(routing_table, 4, 2), [4, 1, 2], "Wrong route from vertex 4 to vertex 2")
-        self.assertEqual(self.player.find_route(routing_table, 4, 5), [4, 7, 8, 5], "Wrong route from vertex 4 to vertex 5")
-
+        self.assertEqual(self.traversal.find_route(3), [4, 3], "Wrong route from vertex 4 to vertex 3")
+        self.assertEqual(self.traversal.find_route(2), [4, 1, 2], "Wrong route from vertex 4 to vertex 2")
+        self.assertEqual(self.traversal.find_route(5), [4, 7, 8, 5], "Wrong route from vertex 4 to vertex 5")
     ##################################################################################
 
     def test___dfs_find_route___source_is_target___single_vertex_route (self) -> None:
@@ -427,12 +434,11 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Routing table obtained with a traversal of the tree maze from vertex 4 (see the ``setUpClass(...)`` method)
-        routing_table = {4: None, 1: 4, 3: 4, 7: 4, 0: 1, 2: 1, 6: 7, 8: 7, 5: 8}
+        self.traversal.traversal(self.tree_maze, 4)
 
         # The route should only contain the source
-        self.assertEqual(self.player.find_route(routing_table, 4, 4), [4], "The route from the root to itself should only contain the root")
-        self.assertEqual(self.player.find_route(routing_table, 7, 7), [7], "The route from a vertex to itself should only contain that vertex, even if it is not the root")
-
+        self.assertEqual(self.traversal.find_route(4), [4], "The route from the root to itself should only contain the root")
+        self.assertEqual(self.traversal.find_route(7), [7], "The route from a vertex to itself should only contain that vertex, even if it is not the root")
     ##################################################################################
 
     def test___dfs_find_route___source_is_not_root___partial_route (self) -> None:
@@ -444,12 +450,11 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Routing table obtained with a traversal of the tree maze from vertex 4 (see the ``setUpClass(...)`` method)
-        routing_table = {4: None, 1: 4, 3: 4, 7: 4, 0: 1, 2: 1, 6: 7, 8: 7, 5: 8}
+        self.traversal.traversal(self.tree_maze, 4)
 
         # The route should start at the source
-        self.assertEqual(self.player.find_route(routing_table, 1, 2), [1, 2], "The route from vertex 1 to vertex 2 should start at vertex 1, not at the root")
-        self.assertEqual(self.player.find_route(routing_table, 7, 5), [7, 8, 5], "The route from vertex 7 to vertex 5 should start at vertex 7, not at the root")
-
+        self.assertEqual(self.traversal.find_route(2), [4, 1, 2], "Wrong route from vertex 4 to vertex 2")
+        self.assertEqual(self.traversal.find_route(5), [4, 7, 8, 5], "Wrong route from vertex 4 to vertex 5")
     ##################################################################################
 
     def test___dfs_find_route___source_not_in_routing_table___raises_error (self) -> None:
@@ -461,11 +466,11 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Routing table obtained with a traversal of the tree maze from vertex 4 (see the ``setUpClass(...)`` method)
-        routing_table = {4: None, 1: 4, 3: 4, 7: 4, 0: 1, 2: 1, 6: 7, 8: 7, 5: 8}
+        self.traversal.traversal(self.tree_maze, 4)
 
-        # Vertex 9 is not in the routing table
-        with self.assertRaises(KeyError, msg="Finding a route from a vertex that is not in the routing table should raise an error"):
-            self.player.find_route(routing_table, 9, 5)
+        # Target 9 is not in the routing table
+        with self.assertRaises(KeyError, msg="Finding a route to a vertex that is not in the routing table should raise an error"):
+            self.traversal.find_route(9)
 
     ##################################################################################
 
@@ -478,11 +483,11 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Routing table obtained with a traversal of the tree maze from vertex 4 (see the ``setUpClass(...)`` method)
-        routing_table = {4: None, 1: 4, 3: 4, 7: 4, 0: 1, 2: 1, 6: 7, 8: 7, 5: 8}
+        self.traversal.traversal(self.tree_maze, 4)
 
         # Vertex 9 is not in the routing table
         with self.assertRaises(KeyError, msg="Finding a route to a vertex that is not in the routing table should raise an error"):
-            self.player.find_route(routing_table, 4, 9)
+            self.traversal.find_route(9)
 
     ##################################################################################
 
@@ -494,14 +499,11 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Routing table obtained with a traversal of the tree maze from vertex 4 (see the ``setUpClass(...)`` method)
-        routing_table = {4: None, 1: 4, 3: 4, 7: 4, 0: 1, 2: 1, 6: 7, 8: 7, 5: 8}
+        self.traversal.traversal(self.tree_maze, 4)
 
-        # None is not a routing table, and "5" is a string, not the integer 5 that is in the routing table
-        with self.assertRaises(TypeError, msg="Finding a route in None should raise an error"):
-            self.player.find_route(None, 4, 5)
+        # "5" is a string, not the integer 5 that is in the routing table
         with self.assertRaises(KeyError, msg="Finding a route to a string should raise an error"):
-            self.player.find_route(routing_table, 4, "5")
-
+            self.traversal.find_route("5")
     ##################################################################################
 
     def test___dfs_find_route___invalid_routing_table___raises_error (self) -> None:
@@ -514,8 +516,9 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # The parent of vertex 1 is vertex 5, which is not in the routing table
-        with self.assertRaises(KeyError, msg="Finding a route with a parent that is not in the routing table should raise an error"):
-            self.player.find_route({0: None, 1: 5}, 0, 1)
+        self.traversal.traversal(self.disconnected_maze, 0)
+        with self.assertRaises(KeyError, msg="Finding a route to an unreachable vertex should raise an error"):
+            self.traversal.find_route(3)
 
     ##################################################################################
 
@@ -528,11 +531,11 @@ class DFSTraversal_Tests (unittest.TestCase):
         """
 
         # Routing table obtained with a traversal of the tree maze from vertex 4 (see the ``setUpClass(...)`` method)
-        routing_table = {4: None, 1: 4, 3: 4, 7: 4, 0: 1, 2: 1, 6: 7, 8: 7, 5: 8}
+        self.traversal.traversal(self.tree_maze, 4)
 
-        # Vertex 3 is in another branch than vertex 5
-        with self.assertRaises(KeyError, msg="Finding a route from a vertex that is not an ancestor of the target should raise an error"):
-            self.player.find_route(routing_table, 3, 5)
+        # Target 99 does not exist in the tree maze
+        with self.assertRaises(KeyError, msg="Finding a route to a non-existent vertex should raise an error"):
+            self.traversal.find_route(99)
 
 ##########################################################################################
 ######################################### SCRIPT #########################################
