@@ -11,7 +11,7 @@ from players.bfs import BFS
 ##########################################################################################
 
 if __name__ == "__main__":
-    game_config = {"mud_percentage": 0.0,
+    game_config = {"mud_percentage": 20.0,
                    "maze_width": 13,
                    "maze_height": 10,
                    "nb_cheese": 1,
