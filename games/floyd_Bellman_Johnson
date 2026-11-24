@@ -1,0 +1,94 @@
+#####################################################################################################################################################
+######################################################################## INFO #######################################################################
+#####################################################################################################################################################
+
+"""
+This script verifies the correctness of our Dijkstra implementation (`DijkstraTraversal`) by comparing its computed shortest-path distances
+against SciPy's standard graph algorithms (Floyd-Warshall, Bellman-Ford, and Johnson) on a weighted PyRat maze with mud.
+"""
+
+#####################################################################################################################################################
+###################################################################### IMPORTS ######################################################################
+#####################################################################################################################################################
+
+# External imports
+import numpy as np
+from scipy.sparse import csr_matrix
+from scipy.sparse.csgraph import bellman_ford, floyd_warshall, johnson
+
+# PyRat imports
+from pyrat import Maze, RandomMaze
+from utils.traversal.dijkstra_traversal import DijkstraTraversal
+
+#####################################################################################################################################################
+##################################################################### FUNCTIONS #####################################################################
+#####################################################################################################################################################
+
+def maze_to_csr ( maze: Maze
+                ) ->    tuple[csr_matrix, dict[int, int]]:
+
+    """
+    Converts a PyRat maze into a Compressed Sparse Row (CSR) weighted adjacency matrix suitable for `scipy.sparse.csgraph`.
+
+    Args:
+        maze: Maze instance to convert.
+
+    Returns:
+        A tuple containing:
+            - graph_csr: Weighted adjacency matrix in CSR format (`csr_matrix`).
+            - idx:       Dictionary mapping each maze vertex ID to its matrix row/column index.
+    """
+
+    # Map each vertex to a contiguous matrix index
+    vertices = maze.get_vertices()
+    n = len(vertices)
+    idx = {v: i for i, v in enumerate(vertices)}
+
+    # Initialize adjacency matrix with infinity and zero diagonal
+    matrix = np.full((n, n), np.inf)
+    np.fill_diagonal(matrix, 0)
+
+    # Populate edge weights from maze neighbors
+    for u in vertices:
+        for v in maze.get_neighbors(u):
+            matrix[idx[u], idx[v]] = maze.get_weight(u, v)
+
+    return csr_matrix(matrix), idx
+
+#####################################################################################################################################################
+###################################################################### SCRIPT #######################################################################
+#####################################################################################################################################################
+
+if __name__ == "__main__":
+
+    # Generate a reproducible maze with walls and mud
+    maze = RandomMaze(width=15,
+                      height=12,
+                      wall_percentage=40.0,
+                      mud_percentage=25.0,
+                      mud_range=[4, 9],
+                      random_seed=42)
+    source = maze.get_vertices()[0]
+
+    # Run our Dijkstra traversal implementation
+    dijkstra = DijkstraTraversal()
+    dijkstra.traversal(maze, source)
+    dist_dijkstra = dijkstra.get_distances()
+
+    # Convert the maze graph into CSR format for SciPy
+    graph_csr, idx = maze_to_csr(maze)
+    s_idx = idx[source]
+
+    # Compute shortest-path distances using SciPy's algorithms
+    dist_fw = floyd_warshall(graph_csr, directed=False)[s_idx]
+    dist_bf = bellman_ford(graph_csr, directed=False, indices=s_idx)
+    dist_jo = johnson(graph_csr, directed=False)[s_idx]
+
+    # Assert that all four algorithms return identical shortest-path distances
+    for v, i in idx.items():
+        assert dist_dijkstra[v] == dist_fw[i] == dist_bf[i] == dist_jo[i]
+
+    print("Floyd-Warshall, Bellman-Ford et Johnson donnent exactement les mêmes distances que Dijkstra.")
+
+#####################################################################################################################################################
+#####################################################################################################################################################
