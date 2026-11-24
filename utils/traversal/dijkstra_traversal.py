@@ -89,7 +89,7 @@ class DijkstraTraversal (Traversal):
         """
 
         # We append the element to the end of the list
-        self.queue.append(element)
+        self.queue.add_or_replace(element)
 
     ##################################################################################
 
@@ -104,10 +104,7 @@ class DijkstraTraversal (Traversal):
         Returns:
             The extracted element, as a tuple (distance, vertex, parent).
         """
-
-        #on retire l'élément avec la plus courte distance
-        dist_min = np.inf
-        sommet_min = None
+        return self.queue.remove()
 
 
 
@@ -126,7 +123,7 @@ class DijkstraTraversal (Traversal):
         """
 
         # The queue is empty when the list has no element
-        return len(self.queue) == 0
+        return self.queue.get_taille()
 
 
 ##########################################################################################
