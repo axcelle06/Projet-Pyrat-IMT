@@ -109,32 +109,25 @@ class Traversal (abc.ABC):
 
         # Initialization
         self.initialize_structure()
-        if liste_sommets is None:
-            self.distances = {source : 0}
-            self.routing_table = {source : None}
-            self.add_to_structure(source)
-            while not self.is_structure_empty():
-                parent = self.get_from_structure()
-                for voisin in graph.get_neighbors(parent):
-                    if voisin not in self.distances:
-                        self.distances[voisin] = graph.get_weight(parent,voisin) + self.distances[parent]
-                        self.routing_table[voisin] = parent
-                        self.add_to_structure(voisin)
-        else:
-            self.distances = {source : 0}
-            self.routing_table = {source : None}
-            if source in liste_sommets:
+        self.distances = {source : 0}
+        self.routing_table = {source : None}
+        # If the source is in the list of vertices to explore, we return it immediately
+        if liste_sommets is not None and source in liste_sommets:
                 return source
-            self.add_to_structure(source)
-            while not self.is_structure_empty():
-                parent = self.get_from_structure()
-                for voisin in graph.get_neighbors(parent):
-                    if voisin not in self.distances:
-                        self.distances[voisin] = graph.get_weight(parent,voisin) + self.distances[parent]
+        # We add the source to the data structure with a distance of 0
+        self.add_to_structure((source,0))
+
+        while not self.is_structure_empty():
+            parent, dist_parent = self.get_from_structure()
+            # If the parent is in the list of vertices to explore, we return it immediately
+            if liste_sommets is not None and parent in liste_sommets:
+                return parent
+            for voisin in graph.get_neighbors(parent):
+                new_distance = graph.get_weight(parent,voisin) + dist_parent
+                if voisin not in self.distances or new_distance < self.distances[voisin]:
+                        self.distances[voisin] = new_distance
                         self.routing_table[voisin] = parent
-                        self.add_to_structure(voisin)
-                        if voisin in liste_sommets:
-                            return voisin
+                        self.add_to_structure((voisin, new_distance))
 
 
         return None
