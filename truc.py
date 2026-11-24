@@ -1,2 +1,3 @@
-truc = [(1,5)]
-print(1 in truc)
+import math
+for i in range(1,8):
+    print(f"Log2({i}) = {int(math.log2(i))}")
