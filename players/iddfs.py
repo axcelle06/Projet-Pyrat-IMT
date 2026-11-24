@@ -29,14 +29,21 @@ class IDDFS(Player) :
 
         # Initialize visited cells
         self.visited_cells = set()
+        self.actions = []
+        remaining_cheese = set(game_state.cheese)
+        my_location = game_state.player_locations[self.get_name()]
+
+        while len(remaining_cheese)>0:
+            _, routing_table, cheese = self.traversal(maze,my_location, remaining_cheese )
+            chemin_fromage = self.find_route(routing_table, my_location, cheese)
+            self.actions += [maze.locations_to_action(chemin_fromage[i],chemin_fromage[i+1]) for i in range(len(chemin_fromage)-1)]
+            my_location = cheese
+            remaining_cheese.remove(cheese)
+
 
         # Reduce the maze
-        my_location = game_state.player_locations[self.get_name()]
         #self.reduced_maze = self.remove_dead_ends(maze, [my_location] + game_state.cheese)
-        _, routing_table = self.traversal(maze,my_location)
         #On considère ici qu'on prend les fromages dans l'ordre où ils sont dans game_state, à opti plus tard ?
-        chemin_fromage = self.find_route(routing_table, my_location, game_state.cheese[0])
-        self.actions = [maze.locations_to_action(chemin_fromage[i],chemin_fromage[i+1]) for i in range(len(chemin_fromage)-1)]
 
 
         
@@ -85,27 +92,43 @@ class IDDFS(Player) :
             - The distances from the source to each explored vertex.
             - The routing table, that is, the parent of each vertex in the traversal (None for the source).
         """
+        def DLS(node,depth):
+                    if depth == 0:
+                        if node in objectifs:
+                            return (node, True)
+                        else:
+                            return (None, True) #not found but may have children
+                    else: #on considere depth>0 en entrée
+                        any_remaining = False
+                        for voisin in graph.get_neighbors(node):
+                            if voisin not in sommets_visites:
+        
+                                rooting_table[voisin] = node
+                                sommets_visites[voisin] = graph.get_weight(voisin,node) + sommets_visites[node]
+                                
+                                found, remaining = DLS(voisin, depth-1)
+                                if found is not None:
+                                    return (found, True)
+                                if remaining:
+                                    any_remaining = True
+                        return (None, any_remaining)
+                    
         depth = 0
-        sommets_visites = ...
-        rooting_table = ...
-    
-        def DLS(node,depth,objectifs):
-            if depth == 0:
-                if node in objectifs:
-                    return (node, True)
-                else:
-                    return (None, True)
-            else:
-                any_remaining = False
-                for voisin in graph.get_neighbors():
-                    if voisin not in sommets_visites:
-                        found, remaining = DLS(voisin, depth-1)
-                        if found is None:
-                            return (found, True)
-                        if remaining:
-                            any_remaining = True
+        remaining = True
+        while remaining:
+            sommets_visites = {source : 0}
+            rooting_table = {source : None}
+            found, remaining = DLS(source, depth)
+            
+            if found is not None:
+                return sommets_visites, rooting_table, found
 
-                return (None, any_remaining)
+            depth+=1
+        return sommets_visites, rooting_table, None
+        
+        
+    
+        
 
     def find_route ( self, routing_table: dict[int, int | None], source: int, target:int) -> list[int]:
         #pas d'ia utilisée
